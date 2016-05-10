@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Perceptron.h"
+#include "TicTacToe.h"
 
 class TicTacToeNetwork
 {
@@ -9,7 +10,7 @@ public:
 	~TicTacToeNetwork(void);
 
 	void trainByBackpropagation(int numPasses, float learningRate);
-	int getIndexforNextToken(bool input[9]);
+	int getIndexforNextToken(std::vector<Faction> input);
 
 private:
 	std::vector<Perceptron*> inputLayer;

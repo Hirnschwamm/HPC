@@ -10,10 +10,9 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	TicTacToe ttt;
 	TicTacToeNetwork ai;
-	ai.trainByBackpropagation(1000, 0.5f);
+	ai.trainByBackpropagation(5000, 0.5f);
 	int playerIndex = 0;
 	int aiIndex = 0;
-	bool aiInput[9];
 	printf("Welcome! Lets play a match of tic tac toe, shall we?\n");
 	do{
 		ttt.printField();
@@ -23,15 +22,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		ttt.placeToken(playerIndex, PLAYER);
 
 		std::vector<Faction> field = ttt.getFormattedField();
-		for(unsigned int i = 0; i < field.size(); i++){
-			if(field[i] == PLAYER){
-				aiInput[i] = true;
-			}else{
-				aiInput[i] = false;
-			}
-		}
-
-		aiIndex = ai.getIndexforNextToken(aiInput);
+		aiIndex = ai.getIndexforNextToken(field);
 		ttt.placeToken(aiIndex, AI);
 
 		Faction winningFaction = ttt.checkForWin();

@@ -67,14 +67,14 @@ void Perceptron::calculateWeights(float learningRate, std::vector<Perceptron*> c
 
 		for(unsigned int i = 0; i < inputs.size(); i++){
 			correction = deltaPredecessors * weightedSum * (1.0f - weightedSum) * inputs[i]->getOutput();
-			weightBuffer[i] = weights[i] - learningRate * correction;
+			weightBuffer[i] = clampWeight(weights[i] + learningRate * correction);
 		}
 
 	}else{
 		for(unsigned int i = 0; i < inputs.size(); i++){
 			lastDelta = -(target - weightedSum) * weightedSum * (1.0f - weightedSum);
 			correction = lastDelta * inputs[i]->getOutput();
-			weightBuffer[i] = weights[i] - learningRate * correction;
+			weightBuffer[i] = clampWeight(weights[i] + learningRate * correction);
 		}
 	}
 	
@@ -105,5 +105,15 @@ void Perceptron::initWeightsAtRandom(int num){
 	for(int i = 0; i < num; i++){
 		weights.push_back((float)rand() / ((float)RAND_MAX / 0.5f));
 		weightBuffer.push_back(0.0f);
+	}
+}
+
+float Perceptron::clampWeight(float weight){
+	if(weight > 1.0f){
+		return 1.0f;
+	}else if(weight < 0.0f){
+		return 0.0f;
+	}else{
+		return weight;
 	}
 }

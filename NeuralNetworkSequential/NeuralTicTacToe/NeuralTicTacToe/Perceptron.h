@@ -30,5 +30,6 @@ private:
 	void calculateWeightedSum();
 	float calculateActivationFunc();
 	void initWeightsAtRandom(int num);
+	float clampWeight(float weight);
 };
 

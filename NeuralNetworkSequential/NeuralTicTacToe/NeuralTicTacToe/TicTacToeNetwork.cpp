@@ -48,14 +48,13 @@ TicTacToeNetwork::~TicTacToeNetwork(void)
 }
 
 void TicTacToeNetwork::trainByBackpropagation(int numPasses, float learningRate){
-	for(int i = 0; i < numPasses; i++){
-		printf("Training AI... %d. pass\n", i);
-		
-		for(unsigned int j = 0; j < trainingData.size(); j++){
-
-			setInput(std::get<0>(trainingData[j]));
-			std::vector<float> targetOutput = std::get<1>(trainingData[j]);
-		
+	
+	float totalError = 0.0f;
+	for(unsigned int j = 0; j < trainingData.size(); j++){
+		setInput(std::get<0>(trainingData[j]));
+		std::vector<float> targetOutput = std::get<1>(trainingData[j]);
+	
+		for(int i = 0; i < numPasses; i++){
 			//forward pass
 			std::vector<float> totalNetOutput;
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
@@ -63,7 +62,7 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, float learningRate)
 			}
 
 			//Calculating the total error
-			float totalError = 0.0f;
+			totalError = 0.0f;
 			for(unsigned int k = 0; k < totalNetOutput.size(); k++){
 				totalError += 0.5f * ((targetOutput[k] - totalNetOutput[k]) * (targetOutput[k] - totalNetOutput[k]));
 			}
@@ -82,13 +81,26 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, float learningRate)
 				hiddenLayer[k]->correctWeights();
 			}
 		}
+		printf("Training AI... %d. move, Error: %f\n", j, totalError);
 	}
+	
 	printf("Done training AI!\n");
 }
 
-int TicTacToeNetwork::getIndexforNextToken(bool input[9]){
+int TicTacToeNetwork::getIndexforNextToken(std::vector<Faction> input){
+	std::vector<float> inputVec; 
+	for(int i = 0; i < 9; i++){
+		if(input[i] == PLAYER){
+			inputVec.push_back(1.0f);
+		}else{
+			inputVec.push_back(0.05f);
+		}
+	}
+	setInput(inputVec);
+
 	for(unsigned int i = 0; i < outputLayer.size(); i++){
-		if(outputLayer[i]->getOutput() >= 0.49f && outputLayer[i]->getOutput() <= 0.51f){
+		float output = outputLayer[i]->getOutput();
+		if(output >= 0.49f && output <= 0.51f){
 			return i;
 		}
 	}
