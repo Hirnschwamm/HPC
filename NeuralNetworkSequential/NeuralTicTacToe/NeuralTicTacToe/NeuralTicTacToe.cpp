@@ -4,15 +4,16 @@
 #include "stdafx.h"
 #include "TicTacToe.h"
 #include "TicTacToeNetwork.h"
-
+#include "TestNetwork.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	//TestNetwork();
 	TicTacToe ttt;
 	TicTacToeNetwork ai;
-	ai.trainByBackpropagation(5000, 0.5f);
+	ai.trainByBackpropagation(500, 0.5f);
 	int playerIndex = 0;
-	int aiIndex = 0;
+	unsigned int aiIndex = 0;
 	printf("Welcome! Lets play a match of tic tac toe, shall we?\n");
 	do{
 		ttt.printField();

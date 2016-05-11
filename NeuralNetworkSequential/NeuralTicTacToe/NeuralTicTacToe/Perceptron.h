@@ -4,32 +4,34 @@ class Perceptron
 public:
 	Perceptron();
 	Perceptron(std::vector<Perceptron*> inputs);
-	Perceptron(float directInput);
+	Perceptron(double directInput);
 	~Perceptron(void);
 
-	float getOutput();
+	double getOutput();
 
 	int getNumInputs();
-	float getWeight(int index);
-	float getLastDelta();
+	double getWeight(int index);
+	double getLastDelta();
 
-	void setWeight(int index, float weight);
-	void setDirectInput(float input);
+	void setWeight(int index, double weight);
+	void setBias(double bias);
+	void setDirectInput(double input);
 
-	void calculateWeights(float learningRate, std::vector<Perceptron*> const * predecessors, float target);
+	void calculateWeights(double learningRate, std::vector<Perceptron*> const * predecessors, double target);
 	void correctWeights();
 
 private:
 	std::vector<Perceptron*> inputs;
-	float directInput;
-	std::vector<float> weights;
-	std::vector<float> weightBuffer;
-	float weightedSum;
-	float lastDelta;
+	double directInput;
+	std::vector<double> weights;
+	std::vector<double> weightBuffer;
+	double biasWeight;
+	double weightedSum;
+	double lastDelta;
 
 	void calculateWeightedSum();
-	float calculateActivationFunc();
+	double calculateActivationFunc();
 	void initWeightsAtRandom(int num);
-	float clampWeight(float weight);
+	double clampWeight(double weight);
 };
 

@@ -15,7 +15,7 @@ public:
 	TicTacToe(void);
 	~TicTacToe(void);
 
-	void placeToken(int fieldIndex, Faction faction);
+	void placeToken(unsigned int fieldIndex, Faction faction);
 	std::vector<Faction> getFormattedField();
 	Faction checkForWin();
 	void printField();

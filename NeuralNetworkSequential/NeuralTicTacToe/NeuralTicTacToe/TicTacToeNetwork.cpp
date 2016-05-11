@@ -47,24 +47,25 @@ TicTacToeNetwork::~TicTacToeNetwork(void)
 	}
 }
 
-void TicTacToeNetwork::trainByBackpropagation(int numPasses, float learningRate){
+void TicTacToeNetwork::trainByBackpropagation(int numPasses, double learningRate){
 	
-	float totalError = 0.0f;
-	for(unsigned int j = 0; j < trainingData.size(); j++){
-		setInput(std::get<0>(trainingData[j]));
-		std::vector<float> targetOutput = std::get<1>(trainingData[j]);
+	for(int i = 0; i < numPasses; i++){
+		double totalError = 0.0;
+		for(unsigned int j = 0; j < trainingData.size(); j++){
+			setInput(std::get<0>(trainingData[j]));
+			std::vector<double> targetOutput = std::get<1>(trainingData[j]);
+
 	
-		for(int i = 0; i < numPasses; i++){
 			//forward pass
-			std::vector<float> totalNetOutput;
+			std::vector<double> totalNetOutput;
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
 				totalNetOutput.push_back(outputLayer[k]->getOutput());
 			}
 
 			//Calculating the total error
-			totalError = 0.0f;
+			totalError = 0.0;
 			for(unsigned int k = 0; k < totalNetOutput.size(); k++){
-				totalError += 0.5f * ((targetOutput[k] - totalNetOutput[k]) * (targetOutput[k] - totalNetOutput[k]));
+				totalError += 0.5 * ((targetOutput[k] - totalNetOutput[k]) * (targetOutput[k] - totalNetOutput[k]));
 			}
 
 			//calculate new weights and correct the old ones
@@ -73,7 +74,7 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, float learningRate)
 			}
 
 			for(unsigned int k = 0; k < hiddenLayer.size(); k++){
-				hiddenLayer[k]->calculateWeights(learningRate, &outputLayer, 0.0f);
+				hiddenLayer[k]->calculateWeights(learningRate, &outputLayer, 0.0);
 			}
 
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
@@ -81,34 +82,44 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, float learningRate)
 				hiddenLayer[k]->correctWeights();
 			}
 		}
-		printf("Training AI... %d. move, Error: %f\n", j, totalError);
+		printf("Training AI... %d. move, Error: %f\n", i, totalError);
 	}
 	
 	printf("Done training AI!\n");
 }
 
-int TicTacToeNetwork::getIndexforNextToken(std::vector<Faction> input){
-	std::vector<float> inputVec; 
+unsigned int TicTacToeNetwork::getIndexforNextToken(std::vector<Faction> input){
+	std::vector<double> inputVec; 
 	for(int i = 0; i < 9; i++){
 		if(input[i] == PLAYER){
-			inputVec.push_back(1.0f);
+			inputVec.push_back(1.0);
 		}else{
-			inputVec.push_back(0.05f);
+			inputVec.push_back(0.05);
 		}
 	}
 	setInput(inputVec);
 
+	//DEBUG
+	std::vector<double> dbg;
 	for(unsigned int i = 0; i < outputLayer.size(); i++){
-		float output = outputLayer[i]->getOutput();
-		if(output >= 0.49f && output <= 0.51f){
-			return i;
+		dbg.push_back(outputLayer[i]->getOutput());
+	}
+	//DEBUG
+
+	double max = 0.0;
+	unsigned int currentBest = 0;
+	for(unsigned int i = 0; i < outputLayer.size(); i++){
+		double output = outputLayer[i]->getOutput();
+		if(output >= max){
+			max = output;
+			currentBest = i;
 		}
 	}
 
-	return 0;
+	return currentBest;
 }
 
-void TicTacToeNetwork::setInput(std::vector<float> input){
+void TicTacToeNetwork::setInput(std::vector<double> input){
 	for(unsigned int i = 0; i < input.size(); i++){
 		inputLayer[i]->setDirectInput(input[i]);
 	}
@@ -117,18 +128,18 @@ void TicTacToeNetwork::setInput(std::vector<float> input){
 void TicTacToeNetwork::initRandomTrainingData(int num){
 	int randNum = 0;
 	for(int i = 0; i < num; i++){
-		std::vector<float> inputData;
-		std::vector<float> targetData;
+		std::vector<double> inputData;
+		std::vector<double> targetData;
 		for(int j = 0; j < 9; j++){
 			randNum = rand();
-			if((float)randNum > (float)RAND_MAX/2.0f){
-				inputData.push_back(1.0f);
+			if((double)randNum > (double)RAND_MAX/2.0){
+				inputData.push_back(1.0);
 			}else{
-				inputData.push_back(0.0f);
+				inputData.push_back(0.0);
 			}
-			targetData.push_back(1.0f); //TODO: get targetData from oracle
+			targetData.push_back(1.0); //TODO: get targetData from oracle
 		}
-		trainingData.push_back(std::tuple<std::vector<float>, std::vector<float>>(inputData, targetData));
+		trainingData.push_back(std::tuple<std::vector<double>, std::vector<double>>(inputData, targetData));
 	}
 }
 
@@ -145,16 +156,16 @@ void TicTacToeNetwork::initjsonTrainingData(std::string path){
 
 	rapidjson::Value& moves = jsonDoc["moves"];
 	assert(moves.IsArray());
-	std::vector<float> input;
-	std::vector<float> output;
+	std::vector<double> input;
+	std::vector<double> output;
 	for (rapidjson::SizeType i = 0; i < moves.Size(); i++){
 		for(rapidjson::SizeType j = 0; j < moves[i]["input"].Size(); j++){
-			input.push_back( moves[i]["input"][j].GetFloat());
+			input.push_back( moves[i]["input"][j].GetDouble());
 		}
 		for(rapidjson::SizeType j = 0; j < moves[i]["input"].Size(); j++){
-			output.push_back( moves[i]["output"][j].GetFloat());
+			output.push_back( moves[i]["output"][j].GetDouble());
 		}
-		trainingData.push_back(std::tuple<std::vector<float>, std::vector<float>>(input, output));
+		trainingData.push_back(std::tuple<std::vector<double>, std::vector<double>>(input, output));
 		input.clear();
 		output.clear();
 	}

@@ -17,9 +17,9 @@ TicTacToe::~TicTacToe(void)
 {
 }
 
-void TicTacToe::placeToken(int fieldIndex, Faction faction){
-	int row = fieldIndex / 3;
-	int column = fieldIndex % 3;
+void TicTacToe::placeToken(unsigned int fieldIndex, Faction faction){
+	unsigned int row = fieldIndex / 3;
+	unsigned int column = fieldIndex % 3;
 	field[row][column] = faction;
 }
 

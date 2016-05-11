@@ -33,6 +33,9 @@
     <ClInclude Include="TicTacToeNetwork.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="TestNetwork.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -48,6 +51,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="TicTacToeNetwork.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="TestNetwork.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

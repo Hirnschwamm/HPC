@@ -4,33 +4,35 @@
 
 Perceptron::Perceptron(void)
 {
-	weightedSum = 0.0f;
+	weightedSum = 0.0;
 }
 
 Perceptron::Perceptron(std::vector<Perceptron*> inputs){
-	weightedSum = 0.0f;
+	weightedSum = 0.0;
 	this->inputs = inputs;
 	initWeightsAtRandom(inputs.size());
-	directInput = -1.0f;
-	lastDelta = 0.0f;
+	directInput = -1.0;
+	lastDelta = 0.0;
+	biasWeight = 0.0;
 }
 
-Perceptron::Perceptron(float directInput){
-	weightedSum = 0.0f;
+Perceptron::Perceptron(double directInput){
+	weightedSum = 0.0;
 	this->directInput = directInput;
-	lastDelta = 0.0f;
+	lastDelta = 0.0;
+	biasWeight = 0.0;
 }
 
 Perceptron::~Perceptron(void)
 {
 }
 
-float Perceptron::getOutput(){
+double Perceptron::getOutput(){
 	calculateWeightedSum();
 	if(calculateActivationFunc()){
 		return weightedSum;
 	}else{
-		return 0.0f;
+		return 0.0;
 	}
 }
 
@@ -38,43 +40,46 @@ int Perceptron::getNumInputs(){
 	return inputs.size();
 }
 	
-float Perceptron::getWeight(int index){
+double Perceptron::getWeight(int index){
 	return weights[index];
 }
 
-float Perceptron::getLastDelta(){
+double Perceptron::getLastDelta(){
 	return lastDelta;
 }
 
-void Perceptron::setWeight(int index, float weight){
+void Perceptron::setWeight(int index, double weight){
 	weights[index] = weight;
 }
 
-void Perceptron::setDirectInput(float input){
+void Perceptron::setBias(double bias){
+	biasWeight = bias;
+}
+
+void Perceptron::setDirectInput(double input){
 	directInput = input;
 }
 
-void Perceptron::calculateWeights(float learningRate, std::vector<Perceptron*> const * predecessors, float target){
+void Perceptron::calculateWeights(double learningRate, std::vector<Perceptron*> const * predecessors, double target){
 	
-	float correction = 0.0f;
+	double correction = 0.0;
 	if(predecessors){
-		float deltaPredecessors = 0.0f;
-		float predecessorOutput = 0.0f;
+		double deltaPredecessors = 0.0;
+		double predecessorOutput = 0.0;
 		for(unsigned int i = 0; i < predecessors->size(); i++){
 			predecessorOutput = predecessors->at(i)->getOutput();
 			deltaPredecessors += predecessors->at(i)->getLastDelta() * weights[i];
 		}
 
 		for(unsigned int i = 0; i < inputs.size(); i++){
-			correction = deltaPredecessors * weightedSum * (1.0f - weightedSum) * inputs[i]->getOutput();
-			weightBuffer[i] = clampWeight(weights[i] + learningRate * correction);
+			correction = deltaPredecessors * weightedSum * (1.0 - weightedSum) * inputs[i]->getOutput();
+			weightBuffer[i] = clampWeight(weights[i] - learningRate * correction);
 		}
-
 	}else{
 		for(unsigned int i = 0; i < inputs.size(); i++){
-			lastDelta = -(target - weightedSum) * weightedSum * (1.0f - weightedSum);
+			lastDelta = -(target - weightedSum) * weightedSum * (1.0 - weightedSum);
 			correction = lastDelta * inputs[i]->getOutput();
-			weightBuffer[i] = clampWeight(weights[i] + learningRate * correction);
+			weightBuffer[i] = clampWeight(weights[i] - learningRate * correction);
 		}
 	}
 	
@@ -85,34 +90,35 @@ void Perceptron::correctWeights(){
 }
 
 void Perceptron::calculateWeightedSum(){
-	weightedSum = 0.0f;
+	weightedSum = 0.0;
 
-	if(directInput < 0.0f){
+	if(directInput < 0.0){
 		for(unsigned int i = 0; i < inputs.size(); i++){
 			weightedSum += inputs[i]->getOutput() * weights[i];
 		}
+		weightedSum += biasWeight * 1.0;
 		weightedSum = calculateActivationFunc();
 	}else{
 		weightedSum = directInput;
 	}
 }
 
-float Perceptron::calculateActivationFunc(){
-	return 1.0f / 1.0f + -std::pow(euler, weightedSum);
+double Perceptron::calculateActivationFunc(){
+	return 1.0 / (1.0 + std::pow(euler, -weightedSum));
 }
 
 void Perceptron::initWeightsAtRandom(int num){
 	for(int i = 0; i < num; i++){
-		weights.push_back((float)rand() / ((float)RAND_MAX / 0.5f));
-		weightBuffer.push_back(0.0f);
+		weights.push_back((double)rand() / ((double)RAND_MAX / 0.5));
+		weightBuffer.push_back(0.0);
 	}
 }
 
-float Perceptron::clampWeight(float weight){
-	if(weight > 1.0f){
-		return 1.0f;
-	}else if(weight < 0.0f){
-		return 0.0f;
+double Perceptron::clampWeight(double weight){
+	if(weight > 1.0){
+		return 1.0;
+	}else if(weight < 0.0){
+		return 0.0;
 	}else{
 		return weight;
 	}
