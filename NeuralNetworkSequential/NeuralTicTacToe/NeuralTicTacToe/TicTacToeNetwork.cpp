@@ -26,8 +26,6 @@ TicTacToeNetwork::TicTacToeNetwork(void){
 		outputLayer.push_back(new Perceptron(hiddenLayer));
 	}
 
-	//initRandomTrainingData(1000); 
-
 	initjsonTrainingData("TrainingData.json");
 }
 
@@ -49,9 +47,10 @@ TicTacToeNetwork::~TicTacToeNetwork(void)
 
 void TicTacToeNetwork::trainByBackpropagation(int numPasses, double learningRate){
 	
-	for(int i = 0; i < numPasses; i++){
+	for(int i = 0; i < numPasses; i++){	
 		double totalError = 0.0;
 		for(unsigned int j = 0; j < trainingData.size(); j++){
+		
 			setInput(std::get<0>(trainingData[j]));
 			std::vector<double> targetOutput = std::get<1>(trainingData[j]);
 
@@ -68,15 +67,15 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, double learningRate
 				totalError += 0.5 * ((targetOutput[k] - totalNetOutput[k]) * (targetOutput[k] - totalNetOutput[k]));
 			}
 
+			//printf(" | %d. move, Error: %f", j, totalError);
+
 			//calculate new weights and correct the old ones
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
 				outputLayer[k]->calculateWeights(learningRate, NULL, targetOutput[k]);
-			}
-
-			for(unsigned int k = 0; k < hiddenLayer.size(); k++){
 				hiddenLayer[k]->calculateWeights(learningRate, &outputLayer, 0.0);
 			}
 
+			//set corrected weights
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
 				outputLayer[k]->correctWeights();
 				hiddenLayer[k]->correctWeights();
@@ -90,11 +89,11 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, double learningRate
 
 unsigned int TicTacToeNetwork::getIndexforNextToken(std::vector<Faction> input){
 	std::vector<double> inputVec; 
-	for(int i = 0; i < 9; i++){
+	for(unsigned int i = 0; i < input.size(); i++){
 		if(input[i] == PLAYER){
 			inputVec.push_back(1.0);
 		}else{
-			inputVec.push_back(0.05);
+			inputVec.push_back(0.0);
 		}
 	}
 	setInput(inputVec);
@@ -162,7 +161,7 @@ void TicTacToeNetwork::initjsonTrainingData(std::string path){
 		for(rapidjson::SizeType j = 0; j < moves[i]["input"].Size(); j++){
 			input.push_back( moves[i]["input"][j].GetDouble());
 		}
-		for(rapidjson::SizeType j = 0; j < moves[i]["input"].Size(); j++){
+		for(rapidjson::SizeType j = 0; j < moves[i]["output"].Size(); j++){
 			output.push_back( moves[i]["output"][j].GetDouble());
 		}
 		trainingData.push_back(std::tuple<std::vector<double>, std::vector<double>>(input, output));

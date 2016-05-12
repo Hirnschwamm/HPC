@@ -48,6 +48,15 @@ Faction TicTacToe::checkForWin(){
 	return NONE;
 }
 
+void TicTacToe::clearField(){
+	unsigned int dimension = dim;
+	for(unsigned int i = 0; i < dimension; i++){
+		for(unsigned int j = 0; j < dimension; j++){
+			field[i][j] = NONE;
+		}
+	}
+}
+
 std::vector<Faction> TicTacToe::getFormattedField(){
 	std::vector<Faction> f;
 	for(unsigned int i = 0; i < field.size(); i++){

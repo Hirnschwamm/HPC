@@ -11,7 +11,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//TestNetwork();
 	TicTacToe ttt;
 	TicTacToeNetwork ai;
-	ai.trainByBackpropagation(500, 0.5f);
+	ai.trainByBackpropagation(1000, 0.5f);
 	int playerIndex = 0;
 	unsigned int aiIndex = 0;
 	printf("Welcome! Lets play a match of tic tac toe, shall we?\n");
@@ -20,7 +20,12 @@ int _tmain(int argc, _TCHAR* argv[])
 		
 		printf("\nPlace your token!\n");
 		std::cin >> playerIndex;
-		ttt.placeToken(playerIndex, PLAYER);
+		if(playerIndex >= 0 && playerIndex < 9){
+			ttt.placeToken(playerIndex, PLAYER);
+		}else if(playerIndex == 9){
+			ttt.clearField();
+			continue;
+		}
 
 		std::vector<Faction> field = ttt.getFormattedField();
 		aiIndex = ai.getIndexforNextToken(field);
