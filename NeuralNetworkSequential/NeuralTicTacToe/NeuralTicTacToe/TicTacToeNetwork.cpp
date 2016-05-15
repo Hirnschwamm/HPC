@@ -46,7 +46,13 @@ TicTacToeNetwork::~TicTacToeNetwork(void)
 }
 
 void TicTacToeNetwork::trainByBackpropagation(int numPasses, double learningRate){
-	
+	//DEBUG
+	std::vector<double> errors;
+	for(unsigned int j = 0; j < trainingData.size(); j++){
+		errors.push_back(0.0f);
+	}	
+	//DEBUG
+
 	for(int i = 0; i < numPasses; i++){	
 		double totalError = 0.0;
 		for(unsigned int j = 0; j < trainingData.size(); j++){
@@ -68,6 +74,7 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, double learningRate
 			}
 
 			//printf(" | %d. move, Error: %f", j, totalError);
+			errors[j] = totalError;
 
 			//calculate new weights and correct the old ones
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
@@ -81,7 +88,14 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, double learningRate
 				hiddenLayer[k]->correctWeights();
 			}
 		}
-		printf("Training AI... %d. move, Error: %f\n", i, totalError);
+
+		double errorAverage = 0.0f;
+		for(unsigned int j = 0; j < errors.size(); j++){
+			errorAverage += errors[j];
+		}	
+		errorAverage /= (double)errors.size();
+
+		printf("Training AI... %d. pass, average error: %f\n", i, errorAverage);
 	}
 	
 	printf("Done training AI!\n");
@@ -109,7 +123,7 @@ unsigned int TicTacToeNetwork::getIndexforNextToken(std::vector<Faction> input){
 	unsigned int currentBest = 0;
 	for(unsigned int i = 0; i < outputLayer.size(); i++){
 		double output = outputLayer[i]->getOutput();
-		if(output >= max){
+		if(output >= max && input[i] == NONE){
 			max = output;
 			currentBest = i;
 		}

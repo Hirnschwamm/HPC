@@ -18,6 +18,7 @@ public:
 	void placeToken(unsigned int fieldIndex, Faction faction);
 	std::vector<Faction> getFormattedField();
 	Faction checkForWin();
+	bool fieldFull();
 	void clearField();
 	void printField();
 

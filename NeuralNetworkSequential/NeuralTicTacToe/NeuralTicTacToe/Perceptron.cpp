@@ -75,12 +75,14 @@ void Perceptron::calculateWeights(double learningRate, std::vector<Perceptron*> 
 			correction = deltaPredecessors * weightedSum * (1.0 - weightedSum) * inputs[i]->getOutput();
 			weightBuffer[i] = weights[i] - learningRate * correction;
 		}
+		biasWeight -= learningRate * lastDelta;
 	}else{
 		for(unsigned int i = 0; i < inputs.size(); i++){
 			lastDelta = -(target - weightedSum) * weightedSum * (1.0 - weightedSum);
 			correction = lastDelta * inputs[i]->getOutput();
 			weightBuffer[i] = weights[i] - learningRate * correction;
 		}
+		biasWeight -= learningRate * lastDelta;
 	}
 	
 }
@@ -110,6 +112,7 @@ double Perceptron::calculateActivationFunc(){
 void Perceptron::initWeightsAtRandom(int num){
 	for(int i = 0; i < num; i++){
 		weights.push_back((double)rand() / ((double)RAND_MAX / 0.5));
+		biasWeight = (double)rand() / ((double)RAND_MAX / 0.5);
 		weightBuffer.push_back(0.0);
 	}
 }

@@ -48,6 +48,19 @@ Faction TicTacToe::checkForWin(){
 	return NONE;
 }
 
+bool TicTacToe::fieldFull(){
+	bool full = true;
+	
+	unsigned int dimension = dim;
+	for(unsigned int i = 0; i < dimension; i++){
+		for(unsigned int j = 0; j < dimension; j++){
+			full &= (field[i][j] == AI || field[i][j] == PLAYER);
+		}
+	}
+
+	return full;
+}
+
 void TicTacToe::clearField(){
 	unsigned int dimension = dim;
 	for(unsigned int i = 0; i < dimension; i++){

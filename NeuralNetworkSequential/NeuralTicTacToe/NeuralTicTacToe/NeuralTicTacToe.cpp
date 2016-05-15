@@ -11,7 +11,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//TestNetwork();
 	TicTacToe ttt;
 	TicTacToeNetwork ai;
-	ai.trainByBackpropagation(1000, 0.5f);
+	ai.trainByBackpropagation(10000, 1.0f);
 	int playerIndex = 0;
 	unsigned int aiIndex = 0;
 	printf("Welcome! Lets play a match of tic tac toe, shall we?\n");
@@ -39,6 +39,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		}else if(winningFaction == AI){
 			ttt.printField();
 			printf("You lost!\n");
+			break;
+		}else if(winningFaction == NONE && ttt.fieldFull()){
+			ttt.printField();
+			printf("It's a draw!\n");
 			break;
 		}
 
