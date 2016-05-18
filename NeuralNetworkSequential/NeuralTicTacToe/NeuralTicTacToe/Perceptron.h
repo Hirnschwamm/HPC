@@ -26,6 +26,7 @@ private:
 	std::vector<double> weights;
 	std::vector<double> weightBuffer;
 	double biasWeight;
+	double biasBuffer;
 	double weightedSum;
 	double lastDelta;
 

@@ -11,12 +11,26 @@ int _tmain(int argc, _TCHAR* argv[])
 	//TestNetwork();
 	TicTacToe ttt;
 	TicTacToeNetwork ai;
-	ai.trainByBackpropagation(10000, 1.0f);
+	ai.trainByBackpropagation(5000, 0.5f);
 	int playerIndex = 0;
 	unsigned int aiIndex = 0;
 	printf("Welcome! Lets play a match of tic tac toe, shall we?\n");
 	do{
 		ttt.printField();
+		Faction winningFaction = ttt.checkForWin();
+		if(winningFaction == PLAYER){
+			printf("Congrats! You won!\n");
+			ttt.clearField();
+			continue;
+		}else if(winningFaction == AI){
+			printf("You lost!\n");
+			ttt.clearField();
+			continue;
+		}else if(winningFaction == NONE && ttt.fieldFull()){
+			printf("It's a draw!\n");
+			ttt.clearField();
+			continue;
+		}
 		
 		printf("\nPlace your token!\n");
 		std::cin >> playerIndex;
@@ -25,26 +39,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		}else if(playerIndex == 9){
 			ttt.clearField();
 			continue;
+		}else if(playerIndex == 10){
+			break;
 		}
 
 		std::vector<Faction> field = ttt.getFormattedField();
 		aiIndex = ai.getIndexforNextToken(field);
 		ttt.placeToken(aiIndex, AI);
-
-		Faction winningFaction = ttt.checkForWin();
-		if(winningFaction == PLAYER){
-			ttt.printField();
-			printf("Congrats! You won!\n");
-			break;
-		}else if(winningFaction == AI){
-			ttt.printField();
-			printf("You lost!\n");
-			break;
-		}else if(winningFaction == NONE && ttt.fieldFull()){
-			ttt.printField();
-			printf("It's a draw!\n");
-			break;
-		}
 
 	}while(true);
 	system("pause");

@@ -79,6 +79,9 @@ void TicTacToeNetwork::trainByBackpropagation(int numPasses, double learningRate
 			//calculate new weights and correct the old ones
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
 				outputLayer[k]->calculateWeights(learningRate, NULL, targetOutput[k]);
+			}
+
+			for(unsigned int k = 0; k < outputLayer.size(); k++){
 				hiddenLayer[k]->calculateWeights(learningRate, &outputLayer, 0.0);
 			}
 
@@ -106,6 +109,8 @@ unsigned int TicTacToeNetwork::getIndexforNextToken(std::vector<Faction> input){
 	for(unsigned int i = 0; i < input.size(); i++){
 		if(input[i] == PLAYER){
 			inputVec.push_back(1.0);
+		}else if(input[i] == AI){
+			inputVec.push_back(0.5);
 		}else{
 			inputVec.push_back(0.0);
 		}
