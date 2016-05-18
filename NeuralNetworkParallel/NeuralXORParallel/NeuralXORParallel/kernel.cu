@@ -34,11 +34,6 @@ int main()
 
     // cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
-    cudaStatus = cudaDeviceReset();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceReset failed!");
-        return 1;
-    }
 
 	XORNetwork network("XORData.json");
 	network.trainByBackpropagation(0.01, 0.7);
@@ -60,8 +55,14 @@ int main()
 		double result = network.xor(o1, o2);
 
 		printf("\n%d XOR %d = %f\n", o1, o2, result);
-	}while(true);
+	}while(input != -1);
 	system("pause");
+
+	cudaStatus = cudaDeviceReset();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaDeviceReset failed!");
+        return 1;
+    }
 
     return 0;
 }

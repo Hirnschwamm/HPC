@@ -78,6 +78,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\David\Workspace\Libraries\RapidJSON\rapidjson-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -88,6 +89,12 @@
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
+    <CudaCompile>
+      <Optimization>InheritFromHost</Optimization>
+    </CudaCompile>
+    <CudaCompile>
+      <Runtime>InheritFromHost</Runtime>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -152,16 +159,19 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="BackpropagationKernel.cu" />
     <CudaCompile Include="kernel.cu" />
-    <CudaCompile Include="WeightedSumKernel.cu" />
+    <CudaCompile Include="XORNetwork.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Perceptron.cpp" />
+    <ClCompile Include="Perceptron.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
     <ClCompile Include="XORNetwork.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BackpropagationKernel.cuh" />
     <ClInclude Include="Perceptron.h" />
-    <ClInclude Include="WeightedSumKernel.h" />
     <ClInclude Include="XORNetwork.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

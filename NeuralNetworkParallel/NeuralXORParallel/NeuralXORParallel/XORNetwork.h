@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BackpropagationKernel.cuh"
 #include "Perceptron.h"
 
 class XORNetwork

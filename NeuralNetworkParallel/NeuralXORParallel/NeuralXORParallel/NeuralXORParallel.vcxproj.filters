@@ -2,7 +2,8 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
-    <CudaCompile Include="WeightedSumKernel.cu" />
+    <CudaCompile Include="BackpropagationKernel.cu" />
+    <CudaCompile Include="XORNetwork.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Perceptron.cpp">
@@ -19,7 +20,7 @@
     <ClInclude Include="Perceptron.h">
       <Filter>Header</Filter>
     </ClInclude>
-    <ClInclude Include="WeightedSumKernel.h" />
+    <ClInclude Include="BackpropagationKernel.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header">

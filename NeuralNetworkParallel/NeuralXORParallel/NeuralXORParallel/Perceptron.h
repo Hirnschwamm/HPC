@@ -1,9 +1,6 @@
 #pragma once
 
 #include <vector>
-
-#include "WeightedSumKernel.h"
-
 #define euler 2.71828
 
 class Perceptron

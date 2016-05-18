@@ -381,6 +381,13 @@ c:\program files\nvidia gpu computing toolkit\cuda\v7.5\include\vector_types.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include\cuda_runtime.h
 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include\device_launch_parameters.h
 c:\users\david\workspace\uni_programme\highperformancecomputing\neuralnetworkparallel\neuralxorparallel\neuralxorparallel\XORNetwork.h
+c:\users\david\workspace\uni_programme\highperformancecomputing\neuralnetworkparallel\neuralxorparallel\neuralxorparallel\BackpropagationKernel.cuh
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include\cuda_runtime.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include\math_functions.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include\math_constants.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\math.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include\device_launch_parameters.h
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include\device_functions.h
 c:\users\david\workspace\uni_programme\highperformancecomputing\neuralnetworkparallel\neuralxorparallel\neuralxorparallel\Perceptron.h
 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\vector
 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xmemory
@@ -437,3 +444,26 @@ C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\crtdefs.h
 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\mmintrin.h
 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdexcept
 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xstring
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\include\device_functions.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\iostream
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\istream
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\ostream
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\ios
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xlocnum
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\streambuf
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xiosbase
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xlocale
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\typeinfo
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xlocinfo
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xlocinfo.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\ctype.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\crtdefs.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\locale.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\crtdefs.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xdebug
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xfacet
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\system_error
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\cerrno
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\errno.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\crtdefs.h
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\share.h
