@@ -47,7 +47,7 @@ XORNetwork::~XORNetwork(void)
 void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRate){
 	double highestError = errorTolerance + 0.00001;
 	int pass = 0;
-	while(highestError > errorTolerance){	
+	for(pass; pass < 100000; pass++){	
 		printf("Training AI... %d. pass", pass);
 		
 		double totalError = 0.0;
@@ -89,6 +89,10 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 				outputLayer[k]->correctWeights();
 				hiddenLayer[k]->correctWeights();
 			}
+
+			//for(unsigned int k = 0; k < hiddenLayer.size(); k++){
+				
+			//}
 		}
 		pass++;
 		printf("\n");

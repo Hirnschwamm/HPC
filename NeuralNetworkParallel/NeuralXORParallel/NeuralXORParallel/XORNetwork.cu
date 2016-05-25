@@ -62,7 +62,7 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 	}
 
 	double gatheredWeights[2][4]; //[layer][weight]
-	
+
 	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
 		gatheredWeights[0][i * 2] = hiddenLayer[i]->getWeight(0);
 		gatheredWeights[0][i * 2 + 1] = hiddenLayer[i]->getWeight(1);
@@ -72,9 +72,19 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 		gatheredWeights[1][i * 2 + 1] = outputLayer[i]->getWeight(1);
 	}
 
+	double gatheredBiasWeights[2][2];
+	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
+		gatheredBiasWeights[0][i] = hiddenLayer[i]->getBiasWeight();
+	}
+	for(unsigned int i = 0; i < outputLayer.size(); i++){
+		gatheredBiasWeights[1][i] = outputLayer[i]->getBiasWeight();
+	}
+
 	double *dev_input = 0;
     double *dev_output = 0;
     double *dev_weights = 0;
+	double *dev_bias = 0;
+	double *dev_error = 0;
 	cudaError_t cudaStatus;
 
 	cudaStatus = cudaMalloc((void**)&dev_input, 8 * sizeof(double));
@@ -87,8 +97,17 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
         fprintf(stderr, "cudaMalloc failed!");
     }
 
-	size_t pitch;
-	cudaStatus = cudaMallocPitch((void**)&dev_weights, &pitch, 4 * sizeof(double), 2);
+	cudaStatus = cudaMalloc((void**)&dev_weights, 8 * sizeof(double));
+	if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed!");
+    }
+
+	cudaStatus = cudaMalloc((void**)&dev_bias, 4 * sizeof(double));
+	if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed!");
+    }
+
+	cudaStatus = cudaMalloc((void**)&dev_error, 4 * sizeof(double));
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
     }
@@ -103,15 +122,37 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
-	cudaStatus = cudaMemcpy2D(dev_weights, pitch, gatheredWeights, 4 * sizeof(double), 4 * sizeof(double), 2, cudaMemcpyHostToDevice);
+	double gatheredWeightsFlattened[8];
+	int k = 0;
+	for(int i = 0; i < 2; i++){
+		for(int j = 0; j < 4; j++){
+			gatheredWeightsFlattened[k] = gatheredWeights[i][j];
+			k++;
+		}
+	}
+	cudaStatus = cudaMemcpy(dev_weights, gatheredWeightsFlattened, 8 * sizeof(double), cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
-	//for(int pass = 0; pass < 1000; pass++){
-	//	printf("Training AI... %d. pass", pass);
+	double gatheredBiasesFlattened[4];
+	k = 0;
+	for(int i = 0; i < 2; i++){
+		for(int j = 0; j < 2; j++){
+			gatheredBiasesFlattened[k] = gatheredBiasWeights[i][j];
+			k++;
+		}
+	}
+	cudaStatus = cudaMemcpy(dev_bias, gatheredBiasesFlattened, 4 * sizeof(double), cudaMemcpyHostToDevice);
+	if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed!");
+    }
 
-		backpropagationPass<<<1, 4>>>(dev_input, dev_output, dev_weights, pitch);
+	double errors[4];
+	for(int pass = 0; pass < 100000; pass++){
+		printf("Training AI... %d. pass", pass);
+
+		backpropagationPass<<<1, 4>>>(dev_input, dev_output, dev_weights, 4, dev_bias, 2, dev_error, learningRate);
 			
 		/*	//calculate new weights and correct the old ones
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
@@ -129,13 +170,53 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 			}
 		}*/
 		//pass++;
-		printf("\n");
-	//}
-	cudaStatus = cudaMemcpy(gatheredInputData, dev_input, 8 * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaStatus = cudaMemcpy(errors, dev_error, 4 * sizeof(double), cudaMemcpyDeviceToHost);
+		printf("Error: 1. Move: %f | 2. Move: %f | 3. Move: %f | 4. Move: %f\n", errors[0], errors[1], errors[2], errors[3]);
+	}
+	cudaStatus = cudaMemcpy(gatheredWeightsFlattened, dev_weights, 8 * sizeof(double), cudaMemcpyDeviceToHost);
+	cudaStatus = cudaMemcpy(gatheredBiasWeights, dev_bias, 2 * sizeof(double), cudaMemcpyDeviceToHost);
+	cudaStatus = cudaMemcpy(gatheredOutputData, dev_output, 4 * sizeof(double), cudaMemcpyDeviceToHost);
+
+	
+	
+	k = 0;
+	for(int i = 0; i < 2; i++){
+		for(int j = 0; j < 4; j++){
+			gatheredWeights[i][j] = gatheredWeightsFlattened[k];
+			k++;
+		}
+	}
+
+	k = 0;
+	for(int i = 0; i < 2; i++){
+		for(int j = 0; j < 2; j++){
+			gatheredBiasWeights[i][j] = gatheredBiasesFlattened[k];
+			k++;
+		}
+	}
+
+	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
+		hiddenLayer[i]->setWeight(0, gatheredWeights[0][i * 2]);
+		hiddenLayer[i]->setWeight(1, gatheredWeights[0][i * 2 + 1]);
+	}
+
+	for(unsigned int i = 0; i < outputLayer.size(); i++){
+		outputLayer[i]->setWeight(0, gatheredWeights[1][i * 2]);
+		outputLayer[i]->setWeight(1, gatheredWeights[1][i * 2 + 1]);
+	}
+
+	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
+		hiddenLayer[i]->setBias(gatheredBiasWeights[0][i]);
+	}
+
+	for(unsigned int i = 0; i < outputLayer.size(); i++){
+		 outputLayer[i]->setBias(gatheredBiasWeights[1][i]);
+	}
 
 	cudaFree(dev_input);
 	cudaFree(dev_output);
 	cudaFree(dev_weights);
+	cudaFree(dev_bias);
 	
 	printf("Done training AI!\n");
 }

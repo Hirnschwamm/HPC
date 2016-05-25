@@ -37,6 +37,10 @@ double Perceptron::getWeight(int index){
 	return weights[index];
 }
 
+double Perceptron::getBiasWeight(){
+	return biasWeight;
+}
+
 double Perceptron::getLastDelta(){
 	return lastDelta;
 }

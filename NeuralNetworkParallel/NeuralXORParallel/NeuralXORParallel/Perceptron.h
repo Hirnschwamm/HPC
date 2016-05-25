@@ -15,6 +15,7 @@ public:
 
 	int getNumInputs();
 	double getWeight(int index);
+	double getBiasWeight();
 	double getLastDelta();
 
 	void setWeight(int index, double weight);

@@ -1,4 +1,4 @@
-﻿Der Buildvorgang wurde am 17.05.2016 10:53:47 gestartet.
+﻿Der Buildvorgang wurde am 24.05.2016 16:54:58 gestartet.
      1>Projekt "C:\Users\David\Workspace\Uni_Programme\HighPerformanceComputing\NeuralNetworkSequential\NeuralXOR\NeuralXOR\NeuralXOR\NeuralXOR.vcxproj" auf Knoten "2", Build Ziel(e).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Users\David\Workspace\Libraries\RapidJSON\rapidjson-master\include" /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\NeuralXOR.pch" /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt XORNetwork.cpp
@@ -14,4 +14,4 @@
 
 Build erfolgreich.
 
-Verstrichene Zeit 00:00:00.55
+Verstrichene Zeit 00:00:00.41
