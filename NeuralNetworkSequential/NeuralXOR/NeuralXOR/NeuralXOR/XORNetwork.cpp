@@ -77,22 +77,22 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 			
 			//calculate new weights and correct the old ones
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
-				outputLayer[k]->calculateWeights(learningRate, NULL, targetOutput[k]);
+				outputLayer[k]->calculateWeights(learningRate, NULL, k, targetOutput[k]);
 			}
 
 			for(unsigned int k = 0; k < hiddenLayer.size(); k++){
-				hiddenLayer[k]->calculateWeights(learningRate, &outputLayer, 0.0);
+				hiddenLayer[k]->calculateWeights(learningRate, &outputLayer, k, 0.0);
 			}
 
 			//set corrected weights
 			for(unsigned int k = 0; k < outputLayer.size(); k++){
 				outputLayer[k]->correctWeights();
-				hiddenLayer[k]->correctWeights();
+				//hiddenLayer[k]->correctWeights();
 			}
 
-			//for(unsigned int k = 0; k < hiddenLayer.size(); k++){
-			//	hiddenLayer[k]->correctWeights();
-			//}
+			for(unsigned int k = 0; k < hiddenLayer.size(); k++){
+				hiddenLayer[k]->correctWeights();
+			}
 		}
 		pass++;
 		printf("\n");

@@ -20,7 +20,7 @@ public:
 	void setBias(double bias);
 	void setDirectInput(double input);
 
-	void calculateWeights(double learningRate, std::vector<Perceptron*> const * predecessors, double target);
+	void calculateWeights(double learningRate, std::vector<Perceptron*> const * predecessors, int index, double target);
 	void correctWeights();
 
 private:

@@ -59,21 +59,21 @@ void Perceptron::setDirectInput(double input){
 	directInput = input;
 }
 
-void Perceptron::calculateWeights(double learningRate, std::vector<Perceptron*> const * predecessors, double target){
+void Perceptron::calculateWeights(double learningRate, std::vector<Perceptron*> const * predecessors, int index, double target){
 	
 	double correction = 0.0;
 	if(predecessors){
 		double deltaPredecessors = 0.0;
 		for(unsigned int i = 0; i < predecessors->size(); i++){
-			deltaPredecessors += predecessors->at(i)->getLastDelta() * weights[i];
+			deltaPredecessors += predecessors->at(i)->getLastDelta() * predecessors->at(i)->weights[index];
 		}
 
+		double delta = deltaPredecessors * weightedSum * (1.0 - weightedSum);
 		for(unsigned int i = 0; i < inputs.size(); i++){
-			correction = deltaPredecessors * weightedSum * (1.0 - weightedSum) * inputs[i]->getOutput();
-			double dbg = learningRate * correction;
+			correction = delta * inputs[i]->getOutput();
 			weightBuffer[i] = weights[i] - learningRate * correction;
 		}
-		biasBuffer = biasWeight - learningRate * lastDelta;
+		biasBuffer = biasWeight - learningRate * delta;
 	}else{
 		lastDelta = -(target - weightedSum) * weightedSum * (1.0 - weightedSum);
 		for(unsigned int i = 0; i < inputs.size(); i++){
@@ -81,7 +81,6 @@ void Perceptron::calculateWeights(double learningRate, std::vector<Perceptron*> 
 			double dbg = learningRate * correction;
 			weightBuffer[i] = weights[i] - learningRate * correction;
 		}
-		double test = learningRate * lastDelta;
 		biasBuffer = biasWeight - learningRate * lastDelta;
 	}
 	
@@ -99,7 +98,7 @@ void Perceptron::calculateWeightedSum(){
 		for(unsigned int i = 0; i < inputs.size(); i++){
 			weightedSum += inputs[i]->getOutput() * weights[i];
 		}
-		weightedSum += biasWeight * 1.0;
+		weightedSum += biasWeight;
 		weightedSum = calculateActivationFunc();
 	}else{
 		weightedSum = directInput;
