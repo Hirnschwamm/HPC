@@ -9,7 +9,7 @@ public:
 	XORNetwork(std::string dataPath);
 	~XORNetwork(void);
 
-	void trainByBackpropagation(double errorTolerance, double learningRate);
+	void trainByBackpropagation(unsigned int passes, double learningRate);
 	double xor(int operand1, int operand2);
 
 private:

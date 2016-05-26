@@ -91,7 +91,7 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 			}
 
 			//for(unsigned int k = 0; k < hiddenLayer.size(); k++){
-				
+			//	hiddenLayer[k]->correctWeights();
 			//}
 		}
 		pass++;

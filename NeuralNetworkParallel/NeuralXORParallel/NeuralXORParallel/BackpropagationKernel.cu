@@ -25,7 +25,7 @@ __global__ void backpropagationPass(double* inputData, double* outputData, doubl
 	for(int i = 1; i < layerNum; i++){
 		for(int j = 0; j < numNodesPerLayer[i]; j++){
 			for(int k = 0; k < numNodesPerLayer[i - 1]; k++){
-				int index = weightsWidth * (i - 1) + (j + k * numNodesPerLayer[i]); //Calculate weights[i-1][j + k * maxNodeNum]
+				int index = weightsWidth * (i - 1) + (j * maxNodeNum + k); //Calculate weights[i-1][j * maxNodeNum + k]
 				nodeData[i][j] += nodeData[i - 1][k] * weights[index];
 			}
 			int index = biasWidth * (i - 1) + j;
@@ -34,39 +34,10 @@ __global__ void backpropagationPass(double* inputData, double* outputData, doubl
 		} 
 	}
 
-	error[threadIdx.x] = 0.5 * ((nodeData[2][0] - outputData[threadIdx.x]) * (nodeData[2][0] - outputData[threadIdx.x]));
+	error[threadIdx.x] = 0.5 * ((outputData[threadIdx.x] - nodeData[2][0]) * (outputData[threadIdx.x] - nodeData[2][0]));
 
-	//DEBUG
-	/*double* weightsRow = (double*)((char*)weights + (weightPitch * (1 - 1))); //calculate the row for weights[i-1][j + k * maxNodeNum]
-	double* biasWeightsRow = (double*)((char*)biasWeights + (biasWeightPitch * (1 - 1)));
-	nodeData[1][0] += nodeData[0][0] * weightsRow[0];
-	nodeData[1][0] += nodeData[0][1] * weightsRow[1];
-	nodeData[1][0] += biasWeightsRow[0];
-	nodeData[1][0] = squash(nodeData[1][0]);
-
-	nodeData[1][1] += nodeData[0][0] * weightsRow[2];
-	nodeData[1][1] += nodeData[0][1] * weightsRow[3];
-	nodeData[1][1] += biasWeightsRow[1];
-	nodeData[1][1] = squash(nodeData[1][1]);
-
-
-	weightsRow = (double*)((char*)weights + (weightPitch * (2 - 1))); //calculate the row for weights[i-1][j + k * maxNodeNum]
-	biasWeightsRow = (double*)((char*)biasWeights + (biasWeightPitch * (2 - 1)));
-	nodeData[2][0] += nodeData[1][0] * weightsRow[0];
-	nodeData[2][0] += nodeData[1][1] * weightsRow[1];
-	nodeData[2][0] += biasWeightsRow[0];
-	nodeData[2][0] = squash(nodeData[2][0]);
-
-	weightsRow = (double*)((char*)weights + (weightPitch * (1 - 1)));
-	
-	outputData[0] = nodeData[1][0];
-	outputData[1] = nodeData[1][1];
-	outputData[2] = nodeData[2][0];
-	outputData[3] = 123.456;*/
-	//DEBUG
-	
-	double weightBuffer[2][4];
-	double biasBuffer[2][2];
+	double weightBuffer[2][4] = {{0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}};
+	double biasBuffer[2][2] =  {{0.0, 0.0}, {0.0, 0.0}};
 	double target = outputData[threadIdx.x];
 	double delta = 0.0;
 	double correction = 0.0;
@@ -83,8 +54,8 @@ __global__ void backpropagationPass(double* inputData, double* outputData, doubl
 	double outputDeltaSummed = 0.0;
 	double hiddenDelta = 0.0;
 	for(int i = 0; i < numNodesPerLayer[1]; i++){
-		int index = weightsWidth + (i * 2);
-		outputDeltaSummed = delta * weights[index]; //weights[0][i * 2]
+		int index = weightsWidth + i;
+		outputDeltaSummed = delta * weights[index]; //weights[1][i]
 		hiddenDelta = outputDeltaSummed * nodeData[1][i] * (1.0 - nodeData[1][i]);
 		for(int j = 0; j < numNodesPerLayer[0]; j++){
 			correction = hiddenDelta * nodeData[0][j];
@@ -93,19 +64,47 @@ __global__ void backpropagationPass(double* inputData, double* outputData, doubl
 		biasBuffer[0][i] = learningRate * hiddenDelta;
 	}
 
-	__syncthreads();
-
+	//Gather weight and bias correction in shared memory
+	__shared__ double sharedBufferWeights[4][8];
+	int k = 0;
 	for(int i = 0; i < 2; i++){
 		for(int j = 0; j < 4; j++){
-			int index = weightsWidth * i + j; //weights[i][j]
-			weights[index] -= weightBuffer[i][j];
+			sharedBufferWeights[threadIdx.x][k] = weightBuffer[i][j];
+			k++;
 		}
 	}
 
+	__shared__ double sharedBufferBias[4][4];
+	k = 0;
 	for(int i = 0; i < 2; i++){
 		for(int j = 0; j < 2; j++){
-			int index = biasWidth * i + j; //biasweights[i][j]
-			biasWeights[index] -= biasBuffer[i][j];
+			sharedBufferBias[threadIdx.x][k] = biasBuffer[i][j];
+			k++;
 		}
-	}	
+	}
+
+	__syncthreads();
+
+	if(threadIdx.x == 0){
+		k = 0;
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 4; j++){
+				int index = weightsWidth * i + j; //weights[i][j]
+				double correction = sharedBufferWeights[0][k] + sharedBufferWeights[1][k] + sharedBufferWeights[2][k] + sharedBufferWeights[3][k];
+				weights[index] -= correction;
+				k++;
+			}
+		}
+
+		k = 0;
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 2; j++){
+				int index = biasWidth * i + j; //biasweights[i][j]
+				double correction = sharedBufferBias[0][k] + sharedBufferBias[1][k] + sharedBufferBias[2][k] + sharedBufferBias[3][k];
+				biasWeights[index] -= correction;
+				k++;
+			}
+		}
+	}
+	
 }

@@ -43,8 +43,7 @@ XORNetwork::~XORNetwork(void)
 	}
 }
 
-void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRate){
-
+void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate){
 	double gatheredInputData[8];
 	double gatheredOutputData[4];
 	std::vector<double>* inputData;
@@ -148,37 +147,18 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
-	double errors[4];
-	for(int pass = 0; pass < 100000; pass++){
-		printf("Training AI... %d. pass", pass);
+	for(unsigned int pass = 0; pass < passes; pass++){
+		printf("Training AI... %d. pass\n", pass + 1);
 
 		backpropagationPass<<<1, 4>>>(dev_input, dev_output, dev_weights, 4, dev_bias, 2, dev_error, learningRate);
-			
-		/*	//calculate new weights and correct the old ones
-			for(unsigned int k = 0; k < outputLayer.size(); k++){
-				//outputLayer[k]->calculateWeights(learningRate, NULL, targetOutput[k]);
-			}
-
-			for(unsigned int k = 0; k < hiddenLayer.size(); k++){
-				hiddenLayer[k]->calculateWeights(learningRate, &outputLayer, 0.0);
-			}
-
-			//set corrected weights
-			for(unsigned int k = 0; k < outputLayer.size(); k++){
-				outputLayer[k]->correctWeights();
-				hiddenLayer[k]->correctWeights();
-			}
-		}*/
-		//pass++;
-		cudaStatus = cudaMemcpy(errors, dev_error, 4 * sizeof(double), cudaMemcpyDeviceToHost);
-		printf("Error: 1. Move: %f | 2. Move: %f | 3. Move: %f | 4. Move: %f\n", errors[0], errors[1], errors[2], errors[3]);
 	}
-	cudaStatus = cudaMemcpy(gatheredWeightsFlattened, dev_weights, 8 * sizeof(double), cudaMemcpyDeviceToHost);
-	cudaStatus = cudaMemcpy(gatheredBiasWeights, dev_bias, 2 * sizeof(double), cudaMemcpyDeviceToHost);
-	cudaStatus = cudaMemcpy(gatheredOutputData, dev_output, 4 * sizeof(double), cudaMemcpyDeviceToHost);
 
-	
-	
+	double errors[4];
+	cudaStatus = cudaMemcpy(errors, dev_error, 4 * sizeof(double), cudaMemcpyDeviceToHost);
+	printf(" Error: 1. Set: %f | 2. Set: %f | 3. Set: %f | 4. Set: %f\n", errors[0], errors[1], errors[2], errors[3]);
+	cudaStatus = cudaMemcpy(gatheredWeightsFlattened, dev_weights, 8 * sizeof(double), cudaMemcpyDeviceToHost);
+	cudaStatus = cudaMemcpy(gatheredBiasesFlattened, dev_bias, 4 * sizeof(double), cudaMemcpyDeviceToHost);
+
 	k = 0;
 	for(int i = 0; i < 2; i++){
 		for(int j = 0; j < 4; j++){
