@@ -2,6 +2,7 @@
 #include "XORNetwork.h"
 
 #include <cstdio>
+#include <chrono>
 
 #include "rapidjson\document.h"
 #include "rapidjson\writer.h"
@@ -45,6 +46,8 @@ XORNetwork::~XORNetwork(void)
 }
 
 void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRate){
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
 	double highestError = errorTolerance + 0.00001;
 	int pass = 0;
 	for(pass; pass < 100000; pass++){	
@@ -97,8 +100,10 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 		pass++;
 		printf("\n");
 	}
-	
-	printf("Done training AI!\n");
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	long duration = std::chrono::duration_cast<std::chrono::seconds>( t2 - t1 ).count();
+
+	printf("Done training AI! That took me %d seconds!\n", duration);
 }
 
 double XORNetwork::xor(int operand1, int operand2){

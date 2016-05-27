@@ -1,0 +1,25 @@
+﻿Der Buildvorgang wurde am 27.05.2016 16:45:03 gestartet.
+     1>Projekt "C:\Users\David\Workspace\Uni_Programme\HighPerformanceComputing\NeuralNetworkSequential\NeuralXOR\NeuralXOR\NeuralXOR\NeuralXOR.vcxproj" auf Knoten "2", Build Ziel(e).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Users\David\Workspace\Libraries\RapidJSON\rapidjson-master\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Release\NeuralXOR.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Users\David\Workspace\Libraries\RapidJSON\rapidjson-master\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\NeuralXOR.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt NeuralXOR.cpp Perceptron.cpp TestNetwork.cpp XORNetwork.cpp
+         NeuralXOR.cpp
+         Perceptron.cpp
+         TestNetwork.cpp
+         XORNetwork.cpp
+     1>XORNetwork.cpp(104): warning C4244: 'Initialisierung': Konvertierung von '__int64' in 'long', möglicher Datenverlust
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\David\Workspace\Uni_Programme\HighPerformanceComputing\NeuralNetworkSequential\NeuralXOR\NeuralXOR\Release\NeuralXOR.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\David\Workspace\Uni_Programme\HighPerformanceComputing\NeuralNetworkSequential\NeuralXOR\NeuralXOR\Release\NeuralXOR.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\David\Workspace\Uni_Programme\HighPerformanceComputing\NeuralNetworkSequential\NeuralXOR\NeuralXOR\Release\NeuralXOR.lib" /MACHINE:X86 /SAFESEH Release\NeuralXOR.obj
+         Release\Perceptron.obj
+         Release\stdafx.obj
+         Release\TestNetwork.obj
+         Release\XORNetwork.obj
+         Code wird generiert.
+         Codegenerierung ist abgeschlossen.
+         NeuralXOR.vcxproj -> C:\Users\David\Workspace\Uni_Programme\HighPerformanceComputing\NeuralNetworkSequential\NeuralXOR\NeuralXOR\Release\NeuralXOR.exe
+     1>Die Erstellung des Projekts "C:\Users\David\Workspace\Uni_Programme\HighPerformanceComputing\NeuralNetworkSequential\NeuralXOR\NeuralXOR\NeuralXOR\NeuralXOR.vcxproj" ist abgeschlossen, Build Ziel(e).
+
+Build erfolgreich.
+
+Verstrichene Zeit 00:00:01.51

@@ -2,6 +2,7 @@
 
 #include "Perceptron.h"
 
+
 class XORNetwork
 {
 public:

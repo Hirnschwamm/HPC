@@ -7,7 +7,6 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//TestNetwork();
 	XORNetwork network("XORData.json");
 	network.trainByBackpropagation(0.01, 0.7);
 

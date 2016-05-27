@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <tuple>
+#include <chrono>
 
 #include "rapidjson\document.h"
 #include "rapidjson\writer.h"
@@ -44,10 +45,19 @@ XORNetwork::~XORNetwork(void)
 }
 
 void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate){
-	double gatheredInputData[8];
-	double gatheredOutputData[4];
-	std::vector<double>* inputData;
-	std::vector<double>* outputData;
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
+	//Gather inputs and corresponding outputs in on big array
+	int inputSetSize = std::get<0>(trainingData[0]).size();
+	int outputSetSize = std::get<1>(trainingData[0]).size();
+	int totalInputSize = inputSetSize * trainingData.size();
+	int totalOutputSize = outputSetSize * trainingData.size();
+
+	double* gatheredInputData = new double[totalInputSize];
+	double* gatheredOutputData = new double[totalOutputSize];
+	std::vector<double>* inputData = 0;
+	std::vector<double>* outputData = 0;
+
 	int index = 0;
 	for(unsigned int i = 0; i < trainingData.size(); i++){
 		inputData = &std::get<0>(trainingData[i]);
@@ -60,25 +70,37 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 		gatheredOutputData[i] = outputData->at(0);	
 	}
 
-	double gatheredWeights[2][4]; //[layer][weight]
+	//Gather existing weights and biases
+	int weightlayerNum = 2; //0: hiddenlayer, 1: outputlayer
+	int *nodesPerLayer = new int[weightlayerNum + 1]; //+ 1 because of the inputlayer
+	nodesPerLayer[0] = inputLayer.size();
+	nodesPerLayer[1] = hiddenLayer.size();
+	nodesPerLayer[2] = outputLayer.size();
 
+	int maxWeightNum = max(inputLayer.size() * hiddenLayer.size(), hiddenLayer.size() * outputLayer.size());
+	int totalWeightSize = weightlayerNum * maxWeightNum;
+	double *gatheredWeights = new double[totalWeightSize]; 
+	
 	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
-		gatheredWeights[0][i * 2] = hiddenLayer[i]->getWeight(0);
-		gatheredWeights[0][i * 2 + 1] = hiddenLayer[i]->getWeight(1);
+		gatheredWeights[maxWeightNum * 0 + (i * 2)] = hiddenLayer[i]->getWeight(0);     //gatheredWeights[0][i*2]
+		gatheredWeights[maxWeightNum * 0 + (i * 2 + 1)] = hiddenLayer[i]->getWeight(1); //gatheredWeights[0][i*2+1]
 	}
 	for(unsigned int i = 0; i < outputLayer.size(); i++){
-		gatheredWeights[1][i * 2] = outputLayer[i]->getWeight(0);
-		gatheredWeights[1][i * 2 + 1] = outputLayer[i]->getWeight(1);
+		gatheredWeights[maxWeightNum * 1 + (i * 2)] = outputLayer[i]->getWeight(0);     //gatheredWeights[1][i*2]
+		gatheredWeights[maxWeightNum * 1 + (i * 2 + 1)] = outputLayer[i]->getWeight(1);	//gatheredWeights[1][i*2+1]
 	}
 
-	double gatheredBiasWeights[2][2];
+	int maxBiasNum = max(hiddenLayer.size(), hiddenLayer.size());
+	int totalBiasSize = weightlayerNum * maxBiasNum;
+	double *gatheredBiases = new double[totalBiasSize];
 	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
-		gatheredBiasWeights[0][i] = hiddenLayer[i]->getBiasWeight();
+		gatheredBiases[maxBiasNum * 0 + i] = hiddenLayer[i]->getBiasWeight();
 	}
 	for(unsigned int i = 0; i < outputLayer.size(); i++){
-		gatheredBiasWeights[1][i] = outputLayer[i]->getBiasWeight();
+		gatheredBiases[maxBiasNum * 1 + i] = outputLayer[i]->getBiasWeight();
 	}
 
+	//Allocate device memory and copy gathered inputs, output, weights and biases to device
 	double *dev_input = 0;
     double *dev_output = 0;
     double *dev_weights = 0;
@@ -86,119 +108,104 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 	double *dev_error = 0;
 	cudaError_t cudaStatus;
 
-	cudaStatus = cudaMalloc((void**)&dev_input, 8 * sizeof(double));
+	cudaStatus = cudaMalloc((void**)&dev_input, totalInputSize * sizeof(double));
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
     }
 
-	cudaStatus = cudaMalloc((void**)&dev_output, 4 * sizeof(double));
+	cudaStatus = cudaMalloc((void**)&dev_output, totalOutputSize * sizeof(double));
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
     }
 
-	cudaStatus = cudaMalloc((void**)&dev_weights, 8 * sizeof(double));
+	cudaStatus = cudaMalloc((void**)&dev_weights, totalWeightSize * sizeof(double));
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
     }
 
-	cudaStatus = cudaMalloc((void**)&dev_bias, 4 * sizeof(double));
+	cudaStatus = cudaMalloc((void**)&dev_bias, totalBiasSize * sizeof(double));
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
     }
 
-	cudaStatus = cudaMalloc((void**)&dev_error, 4 * sizeof(double));
+	cudaStatus = cudaMalloc((void**)&dev_error, trainingData.size() * sizeof(double));
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
     }
 
-	cudaStatus = cudaMemcpy(dev_input, gatheredInputData, 8 * sizeof(double), cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(dev_input, gatheredInputData, totalInputSize * sizeof(double), cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
-	cudaStatus = cudaMemcpy(dev_output, gatheredOutputData, 4 * sizeof(double), cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(dev_output, gatheredOutputData, totalOutputSize * sizeof(double), cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
-	double gatheredWeightsFlattened[8];
-	int k = 0;
-	for(int i = 0; i < 2; i++){
-		for(int j = 0; j < 4; j++){
-			gatheredWeightsFlattened[k] = gatheredWeights[i][j];
-			k++;
-		}
-	}
-	cudaStatus = cudaMemcpy(dev_weights, gatheredWeightsFlattened, 8 * sizeof(double), cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(dev_weights, gatheredWeights, totalWeightSize * sizeof(double), cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
-	double gatheredBiasesFlattened[4];
-	k = 0;
-	for(int i = 0; i < 2; i++){
-		for(int j = 0; j < 2; j++){
-			gatheredBiasesFlattened[k] = gatheredBiasWeights[i][j];
-			k++;
-		}
-	}
-	cudaStatus = cudaMemcpy(dev_bias, gatheredBiasesFlattened, 4 * sizeof(double), cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(dev_bias, gatheredBiases, totalBiasSize * sizeof(double), cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
+	//initiate backpropagation
 	for(unsigned int pass = 0; pass < passes; pass++){
-		printf("Training AI... %d. pass\n", pass + 1);
+		printf("Training Network... %d. pass\n", pass + 1);
 
-		backpropagationPass<<<1, 4>>>(dev_input, dev_output, dev_weights, 4, dev_bias, 2, dev_error, learningRate);
+		backpropagationPass<<<1, trainingData.size()>>>(dev_input, dev_output, dev_weights, maxWeightNum, dev_bias, maxBiasNum, dev_error, learningRate);
 	}
 
-	double errors[4];
-	cudaStatus = cudaMemcpy(errors, dev_error, 4 * sizeof(double), cudaMemcpyDeviceToHost);
-	printf(" Error: 1. Set: %f | 2. Set: %f | 3. Set: %f | 4. Set: %f\n", errors[0], errors[1], errors[2], errors[3]);
-	cudaStatus = cudaMemcpy(gatheredWeightsFlattened, dev_weights, 8 * sizeof(double), cudaMemcpyDeviceToHost);
-	cudaStatus = cudaMemcpy(gatheredBiasesFlattened, dev_bias, 4 * sizeof(double), cudaMemcpyDeviceToHost);
+	//Copy results and errors back to host memory
+	double *errors = new double[trainingData.size()];
+	cudaStatus = cudaMemcpy(errors, dev_error, trainingData.size() * sizeof(double), cudaMemcpyDeviceToHost);
+	cudaStatus = cudaMemcpy(gatheredWeights, dev_weights, 8 * sizeof(double), cudaMemcpyDeviceToHost);
+	cudaStatus = cudaMemcpy(gatheredBiases, dev_bias, 4 * sizeof(double), cudaMemcpyDeviceToHost);
 
-	k = 0;
-	for(int i = 0; i < 2; i++){
-		for(int j = 0; j < 4; j++){
-			gatheredWeights[i][j] = gatheredWeightsFlattened[k];
-			k++;
-		}
+	//Print final error per set
+	printf("Errors: ");
+	for(int i = 0; i < trainingData.size(); i++){
+		printf("%d. Set: %f | ", i, errors[i]);
 	}
-
-	k = 0;
-	for(int i = 0; i < 2; i++){
-		for(int j = 0; j < 2; j++){
-			gatheredBiasWeights[i][j] = gatheredBiasesFlattened[k];
-			k++;
-		}
-	}
-
-	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
-		hiddenLayer[i]->setWeight(0, gatheredWeights[0][i * 2]);
-		hiddenLayer[i]->setWeight(1, gatheredWeights[0][i * 2 + 1]);
-	}
-
-	for(unsigned int i = 0; i < outputLayer.size(); i++){
-		outputLayer[i]->setWeight(0, gatheredWeights[1][i * 2]);
-		outputLayer[i]->setWeight(1, gatheredWeights[1][i * 2 + 1]);
-	}
-
-	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
-		hiddenLayer[i]->setBias(gatheredBiasWeights[0][i]);
-	}
-
-	for(unsigned int i = 0; i < outputLayer.size(); i++){
-		 outputLayer[i]->setBias(gatheredBiasWeights[1][i]);
-	}
+	printf("\n");
 
 	cudaFree(dev_input);
 	cudaFree(dev_output);
 	cudaFree(dev_weights);
 	cudaFree(dev_bias);
-	
-	printf("Done training AI!\n");
+
+	//copy results back into the network
+	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
+		hiddenLayer[i]->setWeight(0, gatheredWeights[maxWeightNum * 0 + (i * 2)]);
+		hiddenLayer[i]->setWeight(1, gatheredWeights[maxWeightNum * 0 + (i * 2 + 1)]);
+	}
+
+	for(unsigned int i = 0; i < outputLayer.size(); i++){
+		outputLayer[i]->setWeight(0, gatheredWeights[maxWeightNum * 1 + (i * 2)]);
+		outputLayer[i]->setWeight(1, gatheredWeights[maxWeightNum * 1 + (i * 2 + 1)]);
+	}
+
+	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
+		hiddenLayer[i]->setBias(gatheredBiases[maxBiasNum * 0 + i]);
+	}
+
+	for(unsigned int i = 0; i < outputLayer.size(); i++){
+		 outputLayer[i]->setBias(gatheredBiases[maxBiasNum * 1 + i]);
+	}
+
+	delete[] gatheredInputData;
+	delete[] gatheredOutputData;
+	delete[] gatheredWeights;
+	delete[] gatheredBiases;
+	delete[] errors;
+
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	long duration = std::chrono::duration_cast<std::chrono::seconds>( t2 - t1 ).count();
+	printf("Done training AI! That took me %d seconds!\n", duration);
 }
 
 double XORNetwork::xor(int operand1, int operand2){
