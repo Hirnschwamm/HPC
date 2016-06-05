@@ -47,7 +47,7 @@ XORNetwork::~XORNetwork(void)
 void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate){
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-	//Gather inputs and corresponding outputs in on big array
+	//Gather inputs and corresponding outputs in one big array
 	int inputSetSize = std::get<0>(trainingData[0]).size();
 	int outputSetSize = std::get<1>(trainingData[0]).size();
 	int totalInputSize = inputSetSize * trainingData.size();
@@ -90,7 +90,7 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 		gatheredWeights[maxWeightNum * 1 + (i * 2 + 1)] = outputLayer[i]->getWeight(1);	//gatheredWeights[1][i*2+1]
 	}
 
-	int maxBiasNum = max(hiddenLayer.size(), hiddenLayer.size());
+	int maxBiasNum = max(hiddenLayer.size(), outputLayer.size());
 	int totalBiasSize = weightlayerNum * maxBiasNum;
 	double *gatheredBiases = new double[totalBiasSize];
 	for(unsigned int i = 0; i < hiddenLayer.size(); i++){
@@ -104,6 +104,7 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 	double *dev_input = 0;
     double *dev_output = 0;
     double *dev_weights = 0;
+	int *dev_numNodesPerLayer = 0;
 	double *dev_bias = 0;
 	double *dev_error = 0;
 	cudaError_t cudaStatus;
@@ -119,6 +120,11 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
     }
 
 	cudaStatus = cudaMalloc((void**)&dev_weights, totalWeightSize * sizeof(double));
+	if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed!");
+    }
+
+	cudaStatus = cudaMalloc((void**)&dev_numNodesPerLayer, (weightlayerNum + 1) * sizeof(int));
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
     }
@@ -148,16 +154,44 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
+	cudaStatus = cudaMemcpy(dev_numNodesPerLayer, nodesPerLayer, (weightlayerNum + 1) * sizeof(int), cudaMemcpyHostToDevice);
+	if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed!");
+    }
+
 	cudaStatus = cudaMemcpy(dev_bias, gatheredBiases, totalBiasSize * sizeof(double), cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
     }
 
+	int maxNodeNum = max(inputLayer.size(), max(hiddenLayer.size(), outputLayer.size()));
+	int sharedNodeDataSize = trainingData.size() * ((weightlayerNum + 1) * maxNodeNum);
+	int sharedWeightBufferSize = trainingData.size() * weightlayerNum * maxWeightNum;//((inputLayer.size() * hiddenLayer.size()) + (hiddenLayer.size() * outputLayer.size()));
+	int sharedBiasBufferSize = trainingData.size() * weightlayerNum * maxNodeNum;//(hiddenLayer.size() + outputLayer.size());
+
+	int sharedMemorySize = sharedNodeDataSize + sharedWeightBufferSize + sharedBiasBufferSize;
+
+	int weightBufferOffset = sharedNodeDataSize;
+	int sharedBiasBufferOffset = sharedWeightBufferSize;
+
 	//initiate backpropagation
 	for(unsigned int pass = 0; pass < passes; pass++){
 		printf("Training Network... %d. pass\n", pass + 1);
 
-		backpropagationPass<<<1, trainingData.size()>>>(dev_input, dev_output, dev_weights, maxWeightNum, dev_bias, maxBiasNum, dev_error, learningRate);
+		backpropagationPass<<<1, trainingData.size(), sharedMemorySize  * sizeof(double)>>>(weightlayerNum + 1, 
+																							maxNodeNum, 
+																							weightBufferOffset,
+																							sharedBiasBufferOffset,
+																							trainingData.size(),
+																							dev_numNodesPerLayer,
+																							dev_input, 
+																							dev_output, 
+																							dev_weights, 
+																							maxWeightNum, 
+																							dev_bias, 
+																							maxBiasNum, 
+																							dev_error, 
+																							learningRate);
 	}
 
 	//Copy results and errors back to host memory
@@ -168,7 +202,7 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 
 	//Print final error per set
 	printf("Errors: ");
-	for(int i = 0; i < trainingData.size(); i++){
+	for(unsigned int i = 0; i < trainingData.size(); i++){
 		printf("%d. Set: %f | ", i, errors[i]);
 	}
 	printf("\n");
@@ -197,6 +231,7 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 		 outputLayer[i]->setBias(gatheredBiases[maxBiasNum * 1 + i]);
 	}
 
+	delete[] nodesPerLayer;
 	delete[] gatheredInputData;
 	delete[] gatheredOutputData;
 	delete[] gatheredWeights;
@@ -204,7 +239,7 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 	delete[] errors;
 
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-	long duration = std::chrono::duration_cast<std::chrono::seconds>( t2 - t1 ).count();
+	long duration = (long)std::chrono::duration_cast<std::chrono::seconds>( t2 - t1 ).count();
 	printf("Done training AI! That took me %d seconds!\n", duration);
 }
 

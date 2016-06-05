@@ -95,8 +95,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <Runtime>MTd</Runtime>
       <Defines>%(Defines)</Defines>
-      <TargetMachinePlatform>32</TargetMachinePlatform>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
       <CodeGeneration>%(CodeGeneration)</CodeGeneration>
+      <Include>./;../../common/inc</Include>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,6 +120,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Runtime>MTd</Runtime>
+      <CodeGeneration>%(CodeGeneration)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

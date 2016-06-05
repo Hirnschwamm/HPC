@@ -16,13 +16,13 @@ int main()
 		do{
 			printf("\nOperand 1: ");
 			std::cin >> input;
-		}while(input != 1 && input != 0);
+		}while(input != 1 && input != 0 && input != -1);
 		o1 = input;
 
 		do{
 			printf("\nOperand 2: ");
 			std::cin >> input;
-		}while(input != 1 && input != 0);
+		}while(input != 1 && input != 0 && input != -1);
 		o2 = input;
 		
 		double result = network.xor(o1, o2);

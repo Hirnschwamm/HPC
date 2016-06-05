@@ -5,4 +5,17 @@
 #include "device_launch_parameters.h"
 #include <device_functions.h>
 
-__global__ void backpropagationPass(double* inputData, double* outputData, double* weights, int weightsWidth, double* biasWeights, int biasWidth, double* error, double learningRate);
+__global__ void backpropagationPass(int layerwidth,
+									int nodeWidth, 
+									int weightBufferOffset,
+									int biasBufferOffset,
+									int trainingDataSize,
+									int* numNodesPerLayer,
+									double* inputData, 
+									double* outputData, 
+									double* weights, 
+									int weightsWidth, 
+									double* biasWeights, 
+									int biasWidth, 
+									double* error, 
+									double learningRate);
