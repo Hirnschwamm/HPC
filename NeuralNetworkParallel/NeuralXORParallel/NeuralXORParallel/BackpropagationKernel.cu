@@ -25,7 +25,9 @@ __global__ void backpropagationPass(int layerwidth,
 	double* weightBuffer = (double*)&nodeData[nodeBufferOffset];	//3D-Array: weightBuffer[threadId][layer][node] 
 	double* biasBuffer = (double*)&weightBuffer[biasBufferOffset];  //3D-Array: biasBuffer[threadId][layer][node]
 
-	int threadOffset = nodeWidth * layerwidth;
+	int threadOffset = layerwidth * nodeWidth;
+	int threadOffsetWeightBuffer = (layerwidth - 1) * weightsWidth;
+	int threadOffsetBiasBuffer = (layerwidth - 1) * nodeWidth;
 
 	nodeData[threadIdx.x * threadOffset + 0 * nodeWidth + 0] = inputData[threadIdx.x * 2];
 	nodeData[threadIdx.x * threadOffset + 0 * nodeWidth + 1] = inputData[threadIdx.x * 2 + 1];
@@ -59,9 +61,9 @@ __global__ void backpropagationPass(int layerwidth,
 	delta = -(target - nodeData[threadIdx.x * threadOffset + outputLayerIndex * nodeWidth + 0]) * nodeData[threadIdx.x * threadOffset + outputLayerIndex * nodeWidth + 0] * (1.0 - nodeData[threadIdx.x * threadOffset + outputLayerIndex * nodeWidth + 0]);
 	for(int j = 0; j < numNodesPerLayer[1]; j++){
 		correction = delta * nodeData[threadIdx.x * threadOffset + 1 * nodeWidth + j];
-		weightBuffer[threadIdx.x * threadOffset + nodeWidth * 1 + j] = learningRate * correction;
+		weightBuffer[threadIdx.x * threadOffsetWeightBuffer + weightsWidth * 1 + j] = learningRate * correction;
 	}
-	biasBuffer[threadIdx.x * threadOffset + nodeWidth * 1 + 0] = learningRate * delta;
+	biasBuffer[threadIdx.x * threadOffsetBiasBuffer + nodeWidth * 1 + 0] = learningRate * delta;
 
 	//calculate weightcorrections for the hidden layer and store them in the buffer
 	double outputDeltaSummed = 0.0;
@@ -72,13 +74,13 @@ __global__ void backpropagationPass(int layerwidth,
 		hiddenDelta = outputDeltaSummed * nodeData[threadIdx.x * threadOffset + 1 * nodeWidth + i] * (1.0 - nodeData[threadIdx.x * threadOffset + 1 * nodeWidth + i]);
 		for(int j = 0; j < numNodesPerLayer[0]; j++){
 			correction = hiddenDelta * nodeData[threadIdx.x * threadOffset + 0 * nodeWidth + j];
-			weightBuffer[threadIdx.x * threadOffset + nodeWidth * 0 + (i * 2 + j)] = learningRate * correction;
+			weightBuffer[threadIdx.x * threadOffsetWeightBuffer + weightsWidth * 0 + (i * 2 + j)] = learningRate * correction;
 		}
-		biasBuffer[threadIdx.x * threadOffset + nodeWidth * 0 + i] = learningRate * hiddenDelta;
+		biasBuffer[threadIdx.x * threadOffsetBiasBuffer + nodeWidth * 0 + i] = learningRate * hiddenDelta;
 	}
-	
-	__syncthreads();
 
+	__syncthreads();
+	
 	if(threadIdx.x == 0){
 		for(int i = 0; i < layerwidth - 1; i++){
 			for(int j = 0; j < weightsWidth; j++){
@@ -86,7 +88,7 @@ __global__ void backpropagationPass(int layerwidth,
 
 				double correction = 0.0;
 				for(int k = 0; k < trainingDataSize; k++){
-					correction += weightBuffer[k * threadOffset + nodeWidth * i + j];
+					correction += weightBuffer[k * threadOffsetWeightBuffer + weightsWidth * i + j];
 				}
 				
 				weights[index] -= correction;
@@ -99,7 +101,7 @@ __global__ void backpropagationPass(int layerwidth,
 
 				double correction = 0.0;
 				for(int k = 0; k < trainingDataSize; k++){
-					correction += biasBuffer[k * threadOffset + nodeWidth * i + j];
+					correction += biasBuffer[k * threadOffsetBiasBuffer + nodeWidth * i + j];
 				}
 
 				biasWeights[index] -= correction;
@@ -107,5 +109,5 @@ __global__ void backpropagationPass(int layerwidth,
 		}
 		
 	}
-
+	
 }
