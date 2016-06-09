@@ -1,5 +1,14 @@
 #include "BackpropagationKernel.cuh"
 
+void setInputData(double* i){
+	cudaMemcpyToSymbol(inputData, i, 8 * sizeof(double));
+}
+
+void setOutputData(double* o){
+	cudaMemcpyToSymbol(outputData, o, 4 * sizeof(double));
+}
+
+
 void setLayerWidth(int l){
 	cudaMemcpyToSymbol(layerwidth,  &l, sizeof(int));
 }
@@ -41,15 +50,10 @@ void setLearningRate(double l){
 }
 
 __device__ double squash(double weightedSum){
-	const double e = 2.71828;
-	return 1.0 / (1.0 + pow(e, -weightedSum));
+	return 1.0 / (1.0 + exp(-weightedSum));
 }
 
-__global__ void backpropagationPass(double* inputData, 
-									double* outputData, 
-									double* weights, 
-									double* biasWeights, 
-									double* error){
+__global__ void backpropagationPass(double* weights, double* biasWeights, double* error){
 	
 	extern __shared__ double sharedMemory[]; 
 	double* nodeData = (double*)&sharedMemory;						//3D-Array: nodeData[threadId][layer][node]
@@ -115,6 +119,10 @@ __global__ void backpropagationPass(double* inputData,
 	if(threadIdx.x == 0){
 		for(int i = 0; i < layerwidth - 1; i++){
 			for(int j = 0; j < weightsWidth; j++){
+				if(i > 0 && j > 2){
+					continue;
+				}
+
 				int index = weightsWidth * i + j; 
 
 				double correction = 0.0;
@@ -128,6 +136,10 @@ __global__ void backpropagationPass(double* inputData,
 
 		for(int i = 0; i < layerwidth - 1; i++){
 			for(int j = 0; j < biasWidth; j++){
+				if(i > 0 && j > 0){
+					continue;
+				}
+
 				int index = biasWidth * i + j; 
 
 				double correction = 0.0;

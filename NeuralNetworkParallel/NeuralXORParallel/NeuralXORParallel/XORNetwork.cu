@@ -102,22 +102,10 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 	}
 
 	//Allocate device memory and copy gathered inputs, output, weights and biases to device
-	double *dev_input = 0;
-    double *dev_output = 0;
     double *dev_weights = 0;
 	double *dev_bias = 0;
 	double *dev_error = 0;
 	cudaError_t cudaStatus;
-
-	cudaStatus = cudaMalloc((void**)&dev_input, totalInputSize * sizeof(double));
-	if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-    }
-
-	cudaStatus = cudaMalloc((void**)&dev_output, totalOutputSize * sizeof(double));
-	if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-    }
 
 	cudaStatus = cudaMalloc((void**)&dev_weights, totalWeightSize * sizeof(double));
 	if (cudaStatus != cudaSuccess) {
@@ -132,16 +120,6 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 	cudaStatus = cudaMalloc((void**)&dev_error, trainingData.size() * sizeof(double));
 	if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
-    }
-
-	cudaStatus = cudaMemcpy(dev_input, gatheredInputData, totalInputSize * sizeof(double), cudaMemcpyHostToDevice);
-	if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-    }
-
-	cudaStatus = cudaMemcpy(dev_output, gatheredOutputData, totalOutputSize * sizeof(double), cudaMemcpyHostToDevice);
-	if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
     }
 
 	cudaStatus = cudaMemcpy(dev_weights, gatheredWeights, totalWeightSize * sizeof(double), cudaMemcpyHostToDevice);
@@ -167,6 +145,8 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 	int weightBufferOffset = sharedNodeDataSize;
 	int sharedBiasBufferOffset = sharedWeightBufferSize;
 
+	setInputData(gatheredInputData);
+	setOutputData(gatheredOutputData);
 	setLayerWidth(weightlayerNum + 1);
 	setNodeWidth(maxNodeNum);
 	setWeightBufferOffset(weightBufferOffset);
@@ -178,14 +158,9 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 	setBiasWidth(maxBiasNum);
 	setLearningRate(learningRate);
 	
-	
 	//initiate backpropagation
 	for(unsigned int pass = 0; pass < (passes / speedUpFac); pass++){
-		backpropagationPass<<<1, numThreads, sharedMemorySize  * sizeof(double)>>>(dev_input, 
-																				   dev_output, 
-																				   dev_weights, 
-																				   dev_bias, 
-																				   dev_error);
+		backpropagationPass<<<1, numThreads, sharedMemorySize  * sizeof(double)>>>(dev_weights, dev_bias, dev_error);
 	}
 
 	//Copy results and errors back to host memory
@@ -196,13 +171,11 @@ void XORNetwork::trainByBackpropagation(unsigned int passes, double learningRate
 
 	//Print final error per set
 	printf("Errors: ");
-	for(unsigned int i = 0; i < 4; i++){
+	for(unsigned int i = 0; i < trainingData.size(); i++){
 		printf("%d. Set: %f | ", i, errors[i]);
 	}
 	printf("\n");
 
-	cudaFree(dev_input);
-	cudaFree(dev_output);
 	cudaFree(dev_weights);
 	cudaFree(dev_bias);
 

@@ -5,6 +5,12 @@
 #include "device_launch_parameters.h"
 #include <device_functions.h>
 
+__constant__ double inputData[8];
+void setInputData(double* i);
+
+__constant__ double outputData[4];
+void setOutputData(double* o);
+
 __constant__ int layerwidth;
 void setLayerWidth(int l);
 
@@ -35,8 +41,4 @@ void setBiasWidth(int b);
 __constant__ double learningRate;
 void setLearningRate(double l);
 
-__global__ void backpropagationPass(double* inputData, 
-									double* outputData, 
-									double* weights, 
-									double* biasWeights, 
-									double* error);
+__global__ void backpropagationPass(double* weights, double* biasWeights, double* error);

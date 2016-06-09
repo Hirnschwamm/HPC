@@ -9,7 +9,7 @@
 int main()
 {
 	XORNetwork network("XORData.json");
-	network.trainByBackpropagation(100000, 0.5);
+	network.trainByBackpropagation(128000, 0.5);
 
 	int o1, o2, input;
 	do{

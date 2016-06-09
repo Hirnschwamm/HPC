@@ -50,7 +50,7 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 
 	double highestError = errorTolerance + 0.00001;
 	int pass = 0;
-	for(pass; pass < 100000; pass++){	
+	for(pass; pass < 128000; pass++){	
 		//printf("Training AI... %d. pass", pass);
 		
 		double totalError = 0.0;
@@ -72,7 +72,7 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 				totalError += 0.5 * ((targetOutput[k] - totalNetOutput[k]) * (targetOutput[k] - totalNetOutput[k]));
 			}
 
-			printf(" | %d. move, Error: %f", j, totalError);
+			//printf(" | %d. move, Error: %f", j, totalError);
 
 			if(totalError > highestError){
 				highestError = totalError;
