@@ -1,12 +1,7 @@
-﻿Der Buildvorgang wurde am 27.05.2016 16:45:03 gestartet.
+﻿Der Buildvorgang wurde am 09.06.2016 07:45:40 gestartet.
      1>Projekt "C:\Users\David\Workspace\Uni_Programme\HighPerformanceComputing\NeuralNetworkSequential\NeuralXOR\NeuralXOR\NeuralXOR\NeuralXOR.vcxproj" auf Knoten "2", Build Ziel(e).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Users\David\Workspace\Libraries\RapidJSON\rapidjson-master\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Release\NeuralXOR.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
-         stdafx.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Users\David\Workspace\Libraries\RapidJSON\rapidjson-master\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\NeuralXOR.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt NeuralXOR.cpp Perceptron.cpp TestNetwork.cpp XORNetwork.cpp
-         NeuralXOR.cpp
-         Perceptron.cpp
-         TestNetwork.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Users\David\Workspace\Libraries\RapidJSON\rapidjson-master\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\NeuralXOR.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt XORNetwork.cpp
          XORNetwork.cpp
      1>XORNetwork.cpp(104): warning C4244: 'Initialisierung': Konvertierung von '__int64' in 'long', möglicher Datenverlust
        Link:
@@ -22,4 +17,4 @@
 
 Build erfolgreich.
 
-Verstrichene Zeit 00:00:01.51
+Verstrichene Zeit 00:00:01.29

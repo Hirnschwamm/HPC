@@ -51,7 +51,7 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 	double highestError = errorTolerance + 0.00001;
 	int pass = 0;
 	for(pass; pass < 100000; pass++){	
-		printf("Training AI... %d. pass", pass);
+		//printf("Training AI... %d. pass", pass);
 		
 		double totalError = 0.0;
 		highestError = 0.0;
@@ -98,10 +98,10 @@ void XORNetwork::trainByBackpropagation(double errorTolerance, double learningRa
 			}
 		}
 		pass++;
-		printf("\n");
+		//printf("\n");
 	}
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-	long duration = std::chrono::duration_cast<std::chrono::seconds>( t2 - t1 ).count();
+	long duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
 
 	printf("Done training AI! That took me %d seconds!\n", duration);
 }
