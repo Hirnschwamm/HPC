@@ -119,35 +119,19 @@ __global__ void backpropagationPass(double* weights, double* biasWeights, double
 	if(threadIdx.x == 0){
 		for(int i = 0; i < layerwidth - 1; i++){
 			for(int j = 0; j < weightsWidth; j++){
-				if(i > 0 && j > 2){
-					continue;
-				}
-
 				int index = weightsWidth * i + j; 
-
-				double correction = 0.0;
 				for(int k = 0; k < threadNum; k++){
-					correction += weightBuffer[k * threadOffsetWeightBuffer + weightsWidth * i + j];
+				weights[index] -= weightBuffer[k * threadOffsetWeightBuffer + weightsWidth * i + j];
 				}
-				
-				weights[index] -= correction;
 			}
 		}
 
 		for(int i = 0; i < layerwidth - 1; i++){
 			for(int j = 0; j < biasWidth; j++){
-				if(i > 0 && j > 0){
-					continue;
-				}
-
 				int index = biasWidth * i + j; 
-
-				double correction = 0.0;
 				for(int k = 0; k < threadNum; k++){
-					correction += biasBuffer[k * threadOffsetBiasBuffer + nodeWidth * i + j];
+					biasWeights[index] -= biasBuffer[k * threadOffsetBiasBuffer + nodeWidth * i + j];
 				}
-
-				biasWeights[index] -= correction;
 			}
 		}
 		
